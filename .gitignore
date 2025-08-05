@@ -1,0 +1,3 @@
+# игнорируем лишнее
+node_modules/
+.DS_Store
