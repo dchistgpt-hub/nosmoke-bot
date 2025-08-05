@@ -1,15 +1,25 @@
-require('dotenv').config();                 // читаем переменные из .env
+// bot/index.js
+require('dotenv').config();
 const { Telegraf } = require('telegraf');
 
-const bot = new Telegraf(process.env.BOT_TOKEN);
+const BOT_TOKEN = process.env.BOT_TOKEN;
+const DOMAIN    = process.env.DOMAIN;           // https://bot.chatnzt.ru
+const PORT      = process.env.PORT || 3000;     // тот же порт, что в Caddyfile
 
-// Простейшая команда /start
-bot.start((ctx) => ctx.reply('Привет! Бот запущен.'));
+const bot = new Telegraf(BOT_TOKEN);
 
-bot.launch()
-  .then(() => console.log('Bot started'))
-  .catch((err) => console.error('Launch error', err));
+// ----- handlers ------------------------------------------------
+bot.start(ctx => ctx.reply('Привет! Бот на веб-хуке.'));
+bot.command('ping', ctx => ctx.reply('pong ✅'));
+// ---------------------------------------------------------------
 
-// Корректное завершение при SIGTERM/SIGINT
-process.once('SIGINT', () => bot.stop('SIGINT'));
-process.once('SIGTERM', () => bot.stop('SIGTERM'));
+// путь вида /bot123:AA...
+const WEBHOOK_PATH = `/bot${BOT_TOKEN}`;
+
+(async () => {
+  // регистрируем веб-хук у Telegram
+  await bot.telegram.setWebhook(`${DOMAIN}${WEBHOOK_PATH}`);
+  // запускаем HTTP-сервер внутри контейнера
+  bot.startWebhook(WEBHOOK_PATH, null, PORT);
+  console.log(`Webhook started on port ${PORT}`);
+})();
