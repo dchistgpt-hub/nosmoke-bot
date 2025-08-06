@@ -1,0 +1,14 @@
+bot.chatnzt.ru {
+	@webhook path /bot*
+	reverse_proxy @webhook bot:3000
+	log {
+		output file /data/caddy/access.log
+		format json
+	}
+	handle /test {
+		respond "Test OK" 200
+	}
+	handle {
+		respond 404
+	}
+}
