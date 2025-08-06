@@ -29,3 +29,4 @@ jobs:
             cd /root/nosmoke-bot
             docker compose up -d --build    # пересобрать и поднять
 SSH
+
