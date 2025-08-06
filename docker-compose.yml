@@ -1,5 +1,28 @@
 services:
   bot:
-    build: ./bot
-    env_file: .env
+    build:
+      context: ./bot
+      dockerfile: Dockerfile
+    env_file:
+      - ./bot/.env
     restart: unless-stopped
+    networks:
+      - nosmoke-bot
+  caddy:
+    build:
+      context: .
+      dockerfile: Dockerfile.caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:rw
+      - /root/caddy/data:/data
+      - /root/caddy/config:/config
+    restart: unless-stopped
+    depends_on:
+      - bot
+    networks:
+      - nosmoke-bot
+networks:
+  nosmoke-bot:
