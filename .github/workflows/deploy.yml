@@ -1,3 +1,4 @@
+# .github/workflows/deploy.yml
 name: Deploy to VPS
 
 on:
@@ -7,24 +8,28 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
+      # 1. Клонируем репозиторий в раннер
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Add SSH key
+      # 2. Добавляем приватный ключ для SSH
+      - name: Setup SSH key
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.VPS_KEY }}
 
-      - name: Sync project to server
+      # 3. Копируем свежий код на сервер (rsync ➜ /root/nosmoke-bot)
+      - name: Upload project to VPS
         run: |
           rsync -az --delete -e "ssh -o StrictHostKeyChecking=no" ./ \
             ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/root/nosmoke-bot
 
+      # 4. Перезапускаем контейнеры на сервере
       - name: Rebuild & restart containers
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} <<'SSH'
             cd /root/nosmoke-bot
-            docker compose pull
-            docker compose up -d --build
+            docker compose up -d --build    # пересобрать и поднять
 SSH
