@@ -28,6 +28,5 @@ jobs:
           ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} <<'SSH'
             cd /root/nosmoke-bot
             docker compose up -d --build    # пересобрать и поднять
-SSH
-
+          SSH
 
