@@ -59,6 +59,23 @@ bot.command('echo', ctx => {
   }
   ctx.reply(msg);
 });
+// /about — краткая справка + ссылка на репозиторий
+const aboutMsg = `
+*NoSmoke\\-bot* — Telegram\\-бот для поддержки чата
+_Версия: 0\\.1_
+
+Доступные команды\\:
+• \`/start\` — приветствие
+• \`/ping\`  — проверка «живой?\`
+• \`/echo <текст>\` — бот повторяет текст
+• \`/quiet\` — показать или изменить «тихие часы\`
+• \`/about\` — эта справка
+
+Исходники на GitHub\\:
+<https://github.com/dchistgpt-hub/nosmoke-bot>
+`;
+
+bot.command('about', ctx => ctx.replyWithMarkdownV2(aboutMsg));
 bot.use(async (ctx, next) => {
   if (ctx.updateType === 'message' && isQuietNow()) {
     // ничего не отвечаем
