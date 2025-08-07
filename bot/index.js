@@ -76,6 +76,7 @@ _Версия: 0\\.1_
 `;
 
 bot.command('about', ctx => ctx.replyWithMarkdownV2(aboutMsg));
+
 bot.use(async (ctx, next) => {
   if (ctx.updateType === 'message' && isQuietNow()) {
     // ничего не отвечаем
