@@ -1,5 +1,21 @@
 // bot/index.js
 require('dotenv').config();
+// ===== quiet hours =====
+let quietRange = (process.env.QUIET_DEFAULT || '23:00-07:00').trim();
+// «23:00-07:00» → { from: 23*60, to: 7*60 } (минуты с начала суток)
+function parseRange(str) {
+  const [h1, h2] = str.split('-')
+    .map(t => t.split(':').map(Number))
+    .map(([h, m]) => h * 60 + (m || 0));
+  return { from: h1, to: h2 };
+}
+function isQuietNow() {
+  const now = new Date();
+  const minutes = now.getHours() * 60 + now.getMinutes();
+  const { from, to } = parseRange(quietRange);
+  return from < to ? (minutes >= from && minutes < to)
+                   : (minutes >= from || minutes < to); // диапазон через полночь
+}
 const { Telegraf } = require('telegraf');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
@@ -11,6 +27,20 @@ const bot = new Telegraf(BOT_TOKEN);
 // ----- handlers ------------------------------------------------
 bot.start(ctx => ctx.reply('Привет! Бот на веб-хуке.'));
 bot.command('ping', ctx => ctx.reply('pong ✅'));
+// /quiet            — показать текущий диапазон
+// /quiet HH:MM-HH:MM — задать новый
+bot.command('quiet', ctx => {
+  const arg = ctx.message.text.replace('/quiet', '').trim();
+  if (!arg) {
+    return ctx.reply(`🤫 Тихие часы сейчас: ${quietRange}`);
+  }
+  // быстрая проверка формата
+  if (!/^\d{1,2}:\d{2}-\d{1,2}:\d{2}$/.test(arg)) {
+    return ctx.reply('❗ Формат: /quiet HH:MM-HH:MM  (пример: /quiet 22:00-08:00)');
+  }
+  quietRange = arg;
+  ctx.reply(`✅ Тихие часы обновлены: ${quietRange}`);
+});
 bot.command('help', ctx => {
   const helpText = `
 Команды бота:
@@ -28,6 +58,13 @@ bot.command('echo', ctx => {
     return ctx.reply('❗ Какой текст повторить? Пиши /echo ваш_текст');
   }
   ctx.reply(msg);
+});
+bot.use(async (ctx, next) => {
+  if (ctx.updateType === 'message' && isQuietNow()) {
+    // ничего не отвечаем
+    return;
+  }
+  await next();
 });
 // ---------------------------------------------------------------
 
