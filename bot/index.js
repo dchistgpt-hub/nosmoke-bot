@@ -20,6 +20,15 @@ bot.command('help', ctx => {
 `;
   ctx.reply(helpText);
 });
+bot.command('echo', ctx => {
+  // ctx.message.text выглядит так: "/echo что-то"
+  // убираем первые 6 символов "/echo "
+  const msg = ctx.message.text.slice(6).trim();
+  if (msg.length === 0) {
+    return ctx.reply('❗ Какой текст повторить? Пиши /echo ваш_текст');
+  }
+  ctx.reply(msg);
+});
 // ---------------------------------------------------------------
 
 // путь вида /bot123:AA...
