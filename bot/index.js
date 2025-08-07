@@ -11,6 +11,15 @@ const bot = new Telegraf(BOT_TOKEN);
 // ----- handlers ------------------------------------------------
 bot.start(ctx => ctx.reply('Привет! Бот на веб-хуке.'));
 bot.command('ping', ctx => ctx.reply('pong ✅'));
+bot.command('help', ctx => {
+  const helpText = `
+Команды бота:
+/start – приветствие
+/ping  – проверка «живой?»
+/help  – показывает это сообщение
+`;
+  ctx.reply(helpText);
+});
 // ---------------------------------------------------------------
 
 // путь вида /bot123:AA...
