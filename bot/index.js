@@ -24,6 +24,21 @@ const PORT      = process.env.PORT || 3000;     // тот же порт, что 
 
 const bot = new Telegraf(BOT_TOKEN);
 
+// ===== middleware: лог всех входящих сообщений =====
+const fs = require('fs');
+const path = require('path');
+const LOG_FILE = path.join(__dirname, '../logs/messages.log');
+
+bot.use(async (ctx, next) => {
+  if (ctx.message && ctx.message.text) {                // текстовые сообщения
+    const line = `[${new Date().toISOString()}] ` +
+                 `${ctx.from.username || ctx.from.id}: ` +
+                 `${ctx.message.text}\n`;
+    fs.promises.appendFile(LOG_FILE, line).catch(console.error);
+  }
+  await next();                                         // передаём дальше
+});
+
 // ----- handlers ------------------------------------------------
 bot.start(ctx => ctx.reply('Привет! Бот на веб-хуке.'));
 bot.command('ping', ctx => ctx.reply('pong ✅'));
