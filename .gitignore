@@ -1,4 +1,7 @@
-# игнорируем лишнее
+.env
+logs/
+caddy/data/
+caddy/config/
 node_modules/
+npm-debug.log*
 .DS_Store
-bot/.env
